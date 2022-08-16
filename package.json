@@ -1,0 +1,47 @@
+{
+  "name": "@taterer/rxjs-debugger",
+  "version": "1.0.0",
+  "description": "Visualize RxJS pipes with scrolling UI elements",
+  "author": "Taylor McKay",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/taterer/rxjs-debugger/issues"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.9.0",
+    "rxjs": "^7.5.5",
+    "rxjs-spy": "^8.0.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.0",
+    "@babel/plugin-transform-react-jsx": "^7.17.3",
+    "@babylonjs/core": "^5.4.0",
+    "@babylonjs/loaders": "^5.4.0",
+    "@parcel/reporter-bundle-analyzer": "^2.4.1",
+    "buffer": "^6.0.3",
+    "parcel": "^2.4.1",
+    "parcel-reporter-static-files-copy": "^1.3.4",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  },
+  "homepage": "https://taterer.github.io/rxjs-debugger/",
+  "keywords": [
+    "rxjs",
+    "ui",
+    "debugger",
+    "graph",
+    "chart",
+    "visual",
+    "reactive"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/taterer/rxjs-debugger.git"
+  },
+  "scripts": {
+    "build": "parcel build"
+  },
+  "source": "src/index.ts",
+  "main": "dist/main.js"
+}
