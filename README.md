@@ -2,6 +2,7 @@
 
 # RxJS-Debugger
 A graphical user interface to visualize RxJS pipes in the browser.
+
 ![](https://github.com/jtmckay/tater-taste/blob/HEAD/client/public/tater.svg)
 ### Why?
 It can be difficult to ensure RxJS subscriptions are properly disposed of, or that events are firing as expected in relation to other pipes.
