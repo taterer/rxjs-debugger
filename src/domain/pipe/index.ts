@@ -36,18 +36,17 @@ export function tag (tag: Tag) {
       return source.lift(new TagOperator(tag, subscriptionId))
     },
     tap(i => emission$.next({ subscriptionId, tag, message: i })),
-    finalize(() => unsubscription$.next({ id: subscriptionId }))
+    finalize(() => {
+      unsubscription$.next({ id: subscriptionId })
+      fancyLog(tag, 'Unsubscribed')
+    })
   )
   if (tag.skipTap) {
     return tagged
   }
   const pipeline = pipe(
     tagged,
-    tap(i => console.log(
-      `%cTag%c "${tag.name}": ${JSON.stringify(i)}`,
-      `background: ${tag.color}`,
-      `background: white`
-    )),
+    tap(i => fancyLog(tag, i)),
   )
 
   return pipeline
@@ -63,6 +62,15 @@ class TagOperator<T> implements Operator<T, T> {
   call(subscriber: Subscriber<T>, source: any): any {
     const subscription = source.subscribe(subscriber);
     subscription$.next({ id: this.subscriptionId, tag: this.tag })
+    fancyLog(this.tag, 'Subscribed')
     return subscription
   }
+}
+
+function fancyLog (tag, message) {
+  console.log(
+    `%cTag%c "${tag.name}": ${JSON.stringify(message)}`,
+    `background: ${tag.color}`,
+    `background: white`
+  )
 }
