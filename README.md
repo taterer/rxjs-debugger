@@ -1,10 +1,9 @@
-![npm (scoped)](https://img.shields.io/npm/v/tater-taste?label=NPM) ![NPM](https://img.shields.io/npm/l/tater-taste?label=License) ![npm](https://img.shields.io/npm/dt/tater-taste?label=Downloads)
+![npm (scoped)](https://img.shields.io/npm/v/@taterer/rxjs-debugger?label=NPM) ![NPM](https://img.shields.io/npm/l/@taterer/rxjs-debugger?label=License) ![npm](https://img.shields.io/npm/dt/@taterer/rxjs-debugger?label=Downloads)
 
 # RxJS-Debugger
 A graphical user interface to visualize RxJS pipes in the browser.
 
 ![](https://github.com/jtmckay/tater-taste/blob/HEAD/client/public/tater.svg)
-
 # Install
 #### `yarn add -D @taterer/rxjs-debugger`
 #### or
@@ -20,6 +19,8 @@ const subscription = observable
 )
 .subscribe();
 ```
+![](https://github.com/taterer/rxjs-debugger/blob/HEAD/src/public/rxjs-debugger-screenshot.png)
+
 ## Icons
 RxJS Debugger uses material icons, and provides an enum with some of the options for easy reference. 
 ```
