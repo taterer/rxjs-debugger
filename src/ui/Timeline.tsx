@@ -2,9 +2,9 @@ import { css } from "@emotion/css"
 import { Observable } from "rxjs"
 import { takeUntil, withLatestFrom, concatMap, filter } from "rxjs/operators"
 import { Icon } from "../domain/timeline/command"
-import { toElement$, _withAnimationFrame_ } from "./jsx"
-import { spy$ } from "."
+import { toElement$ } from "./jsx"
 import Explosion from "./Explosion"
+import { emission$, Tag } from "../domain/pipe"
 
 const animationTransform = [
   { transform: 'translateX(120px)' },
@@ -18,26 +18,27 @@ const animationTiming = {
 
 export default function Timeline ({
   destruction$,
-  rawTag,
+  subscriptionId,
+  tag,
   debug = false,
   scroll = true
 }: {
   destruction$: Observable<any>,
-  rawTag: string,
+  subscriptionId: string,
+  tag: Tag,
   debug?: boolean,
   scroll?: boolean,
 }) {
   const [timeline$] = toElement$(destruction$)
-  const tag = JSON.parse(rawTag)
 
-  spy$
+  emission$
   .pipe(
-    filter(i => i.tag === rawTag),
+    filter(i => i.subscriptionId === subscriptionId),
     concatMap(async i => i),
     withLatestFrom(timeline$),
     takeUntil(destruction$),
   )
-  .subscribe(([spy, timeline]) => {
+  .subscribe(([emission, timeline]) => {
     const timelineElement = <i style={`position: ${scroll ? 'absolute' : ''}; color: ${tag.color || 'black'}`} class="material-icons dp48">{tag.icon || Icon.message}</i>
     timeline.appendChild(timelineElement)
     if (scroll) {
@@ -48,16 +49,12 @@ export default function Timeline ({
       timelineElement.animate(animationTransform, animationTiming)
     }
 
-    if (tag.icon === 'star') {
+    if (emission.tag.icon === 'star') {
       timelineElement.appendChild(<Explosion destruction$={destruction$} icon='star' color='gold' particles={10} />)
     }
 
     if (debug) {
       console.log('Timeline element', timelineElement)
-    }
-
-    if (!tag.skipTap && spy.notitication === 'unsubscribe') {
-      console.log(`%cTag%c "${tag.name}": Unsubscribe`, `background: ${tag.color}`, `background: white`)
     }
   })
 

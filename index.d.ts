@@ -1,6 +1,4 @@
-declare const React;
-
-declare module 'rxjs-debugger' {
+declare module '@taterer/rxjs-debugger' {
   /**
    * Keep track of subscriptions and emissions through an RxJS pipeline
    * @param tag Tag a pipeline

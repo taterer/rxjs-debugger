@@ -1,59 +1,20 @@
 import { css, cx } from "@emotion/css";
-import { BehaviorSubject, EMPTY, Observable, pipe } from 'rxjs'
-import { filter, map, share, take, tap, withLatestFrom } from 'rxjs/operators'
-import { tag as ogTag } from "rxjs-spy/cjs/operators";
-import { create } from "rxjs-spy";
-import { panel } from "./styles";
-import Debugger from "./Timeline";
+import { BehaviorSubject, EMPTY } from 'rxjs'
+import { concatMap, filter, take, tap, withLatestFrom } from 'rxjs/operators'
+import Timeline from "./Timeline";
 import Explosion from "./Explosion";
-
-export interface Tag {
-  name: string
-  skipTap?: boolean
-  icon?: string
-  color?: string
-}
-
-/**
- * Keep track of subscriptions and emissions through an RxJS pipeline
- * @param tag Tag a pipeline
- * @param tag.name Name the pipeline
- * @param tag.color Color the pipeline
- * @param tag.icon Icon to track the pipeline
- * @returns RxJS OperatorFunction
- */
-export function tag<T> (tag: Tag) {
-  const tagged = ogTag<T>(JSON.stringify({ ...tag, id: Math.random() }))
-  if (tag.skipTap) {
-    return tagged
-  }
-  return pipe(
-    tagged,
-    tap(i => console.log(`%cTag%c "${tag.name}": ${i}`, `background: ${tag.color}`, `background: white`)),
-  )
-}
-
-const spy = create();
-export const spy$ = new Observable<string>(function (subscriber) {
-    spy.log({ log: i => subscriber.next(i) })
-  })
-  .pipe(
-    map(i => {
-      const [line1, line2] = i.split('; ')
-      const [_tag, tag] = line1.split(' = ')
-      const [_notitication, notitication] = line2.split(' = ')
-      return { tag, notitication }
-    }),
-    share()
-  )
+import { subscription$, unsubscription$ } from "../domain/pipe";
 
 const view$ = new BehaviorSubject(<View />)
 
 function View () {
   return (
-    <div id='mydivheader' class={cx(
-      panel,
-      css`
+    <div id='mydivheader' class={css`
+        width: 100%;
+        max-width: 800px;
+        background-color: white;
+        border-radius: 4px;
+        transition: box-shadow .25s, -webkit-box-shadow .25s;
         position: fixed;
         bottom: 25px;
         left: 25px;
@@ -62,9 +23,10 @@ function View () {
         height: fit-content;
         max-height: 800px;
         margin: 0px;
-        z-index: 2;
+        z-index: 2000000;
       `
-    )}>
+    }>
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
       <div class={css`
         font-size: 1.2em;
         font-weight: 700;
@@ -131,21 +93,22 @@ function dragElement(elmnt) {
   }
 }
 
-spy$
+subscription$
 .pipe(
-  filter(i => i.notitication === 'subscribe'),
+  concatMap(async i => i),
   withLatestFrom(view$),
 )
-.subscribe(([spy, view]) => {
-  const timeline = <div class={css`
-    padding: 10px 20px;
-  `}>
-    <Debugger destruction$={EMPTY} rawTag={spy.tag} />
+.subscribe(([subscription, view]) => {
+  const timeline = <div
+    class={css`
+      padding: 10px 20px;
+    `}>
+    <Timeline destruction$={EMPTY} subscriptionId={subscription.id} tag={subscription.tag} />
   </div>
   view.appendChild(timeline)
-  spy$
+  unsubscription$
   .pipe(
-    filter(i => i.tag === spy.tag && i.notitication === 'unsubscribe'),
+    filter(i => i.id === subscription.id),
     take(1),
   )
   .subscribe(() => {
