@@ -66,14 +66,3 @@ class TagOperator<T> implements Operator<T, T> {
     return subscription
   }
 }
-
-
-// const original = Observable.prototype.subscribe
-
-// Observable.prototype.subscribe = function (...args): Subscription {
-//     console.log('SUBBED')
-//     const subscription = original.call(this, ...args)
-//     subscription.test = 'some-identifier'
-//     subscription$.next(subscription)
-//     return subscription
-// }
