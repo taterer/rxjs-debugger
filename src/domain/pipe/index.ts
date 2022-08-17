@@ -1,4 +1,4 @@
-import { pipe, tap, finalize, Operator, Subscription, Subscriber, Subject } from 'rxjs'
+import { pipe, tap, finalize, Operator, OperatorFunction, Subscription, Subscriber, Subject } from 'rxjs'
 import { v4 as uuid } from 'uuid'
 
 export interface Tag {
@@ -14,7 +14,7 @@ type Subscription = {
 }
 
 export const subscription$: Subject<Subscription> = new Subject<Subscription>()
-export const unsubscription$: Subject<{ id: string }> = new Subject<{ id: string }>()
+export const complete$: Subject<{ id: string }> = new Subject<{ id: string }>()
 
 type Emission = { subscriptionId: string, tag: Tag, message: any }
 
@@ -29,7 +29,7 @@ export const emission$: Subject<Emission> = new Subject<Emission>()
  * @param tag.skipTap Skip logging to console
  * @returns RxJS OperatorFunction
  */
-export function tag (tag: Tag) {
+export function tag<T> (tag: Tag): OperatorFunction<T, T> {
   const subscriptionId = uuid()
   const tagged = pipe(
     (source) => {
@@ -37,8 +37,8 @@ export function tag (tag: Tag) {
     },
     tap(i => emission$.next({ subscriptionId, tag, message: i })),
     finalize(() => {
-      unsubscription$.next({ id: subscriptionId })
-      fancyLog(tag, 'Unsubscribed')
+      complete$.next({ id: subscriptionId })
+      fancyLog(tag, 'Completed')
     })
   )
   if (tag.skipTap) {

@@ -3,7 +3,7 @@ import { BehaviorSubject, EMPTY } from 'rxjs'
 import { concatMap, filter, take, withLatestFrom } from 'rxjs/operators'
 import Timeline from "./Timeline";
 import Explosion from "./Explosion";
-import { subscription$, unsubscription$ } from "../domain/pipe";
+import { subscription$, complete$ } from "../domain/pipe";
 
 const view$ = new BehaviorSubject(<View />)
 
@@ -106,7 +106,7 @@ subscription$
     <Timeline destruction$={EMPTY} subscriptionId={subscription.id} tag={subscription.tag} />
   </div>
   view.appendChild(timeline)
-  unsubscription$
+  complete$
   .pipe(
     filter(i => i.id === subscription.id),
     take(1),

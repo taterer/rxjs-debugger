@@ -1,3 +1,5 @@
+import { OperatorFunction } from 'rxjs'
+
 declare module '@taterer/rxjs-debugger' {
   /**
    * Keep track of subscriptions and emissions through an RxJS pipeline
@@ -7,7 +9,7 @@ declare module '@taterer/rxjs-debugger' {
    * @param tag.icon Icon to track the pipeline
    * @returns RxJS OperatorFunction
    */
-  export function tag(
+  export function tag<T>(
     {
       name,
       color,
@@ -17,7 +19,7 @@ declare module '@taterer/rxjs-debugger' {
       color?: string,
       icon?: string,
     }
-  )
+  ): OperatorFunction<T, T>
 
   export enum Icon {
     airline_seat_recline_extra = 'airline_seat_recline_extra',

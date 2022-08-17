@@ -12,7 +12,7 @@ const animationTransform = [
 ]
 
 const animationTiming = {
-  duration: 5000,
+  duration: 10000,
   iterations: 1
 }
 
