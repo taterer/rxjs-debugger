@@ -40,8 +40,7 @@
     "url": "git+https://github.com/taterer/rxjs-debugger.git"
   },
   "scripts": {
-    "build": "parcel build",
-    "publish": "yarn build && npm publish"
+    "build": "parcel build"
   },
   "source": "src/index.ts",
   "main": "dist/main.js"
