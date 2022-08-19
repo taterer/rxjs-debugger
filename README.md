@@ -24,6 +24,7 @@ const subscription = observable
 )
 .subscribe();
 ```
+
 ![](https://github.com/taterer/rxjs-debugger/blob/HEAD/src/public/rxjs-debugger-screenshot.png)
 
 ## Icons

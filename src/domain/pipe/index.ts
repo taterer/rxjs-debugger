@@ -1,4 +1,13 @@
-import { pipe, tap, finalize, Operator, OperatorFunction, Subscription, Subscriber, Subject } from 'rxjs'
+import {
+  pipe,
+  tap,
+  finalize,
+  Operator,
+  OperatorFunction,
+  Subscription,
+  Subscriber,
+  Subject
+} from 'rxjs'
 import { v4 as uuid } from 'uuid'
 
 export interface Tag {
@@ -68,8 +77,12 @@ class TagOperator<T> implements Operator<T, T> {
 }
 
 function fancyLog (tag, message) {
+  let text = message
+  try {
+    text = JSON.stringify(message)
+  } catch (err) {}
   console.log(
-    `%cTag%c "${tag.name}": ${JSON.stringify(message)}`,
+    `%cTag%c "${tag.name}": ${text}`,
     `background: ${tag.color}`,
     `background: white`
   )
