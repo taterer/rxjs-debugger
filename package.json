@@ -1,6 +1,6 @@
 {
   "name": "@taterer/rxjs-debugger",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Visualize RxJS pipes with scrolling UI elements",
   "author": "Taylor McKay",
   "license": "MIT",
@@ -40,7 +40,8 @@
     "url": "git+https://github.com/taterer/rxjs-debugger.git"
   },
   "scripts": {
-    "build": "parcel build"
+    "build": "parcel build",
+    "publish": "yarn build && npm publish"
   },
   "source": "src/index.ts",
   "main": "dist/main.js"
