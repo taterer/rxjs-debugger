@@ -1,4 +1,7 @@
 import {
+  concatMap,
+  timer,
+  map,
   pipe,
   tap,
   finalize,
@@ -31,7 +34,7 @@ export const emission$: Subject<Emission> = new Subject<Emission>()
 
 /**
  * Keep track of subscriptions and emissions through an RxJS pipeline
- * @param tag Tag a pipeline
+ * @param tag Name the pipeline
  * @param tag.name Name the pipeline
  * @param tag.color Color the pipeline
  * @param tag.icon Icon to track the pipeline
@@ -89,4 +92,12 @@ function fancyLog (tag, message) {
     `background: ${tag.color}`,
     `background: white`
   )
+}
+
+/**
+ * Slow down a pipe
+ * @param ms Time in milliseconds to delay emissions (1000 ms default)
+ */
+export function slow<T> (milliseconds: number = 1000): OperatorFunction<T, T> {
+  return concatMap(i => timer(milliseconds).pipe(map(() => i)))
 }

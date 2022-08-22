@@ -1,6 +1,6 @@
 {
   "name": "@taterer/rxjs-debugger",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Visualize RxJS pipes with scrolling UI elements",
   "author": "Taylor McKay",
   "license": "MIT",

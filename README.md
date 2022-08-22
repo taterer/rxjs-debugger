@@ -27,6 +27,30 @@ const subscription = observable
 
 ![](https://github.com/taterer/rxjs-debugger/blob/HEAD/src/public/rxjs-debugger-screenshot.png)
 
+The slow operator can be helpful in interpreting the flow
+```
+import { slow, tag } from "@taterer/rxjs-debugger";
+
+const subscription = observable
+.pipe(
+  slow(),
+  tag('Example')
+)
+.subscribe();
+```
+Equivalent to
+```
+import { concatMap, timer, map } from 'rxjs';
+import { tag } from "@taterer/rxjs-debugger";
+
+const subscription = observable
+.pipe(
+  concatMap(i => timer(1000).pipe(map(() => i))),
+  tag('Example')
+)
+.subscribe();
+```
+
 ## Customization
 RxJS Debugger uses material icons, and provides an enum with some of the options for easy reference. You can also specify a color to more easily track events in the console.
 ```
