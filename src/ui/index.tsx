@@ -1,18 +1,31 @@
 import { css } from "@emotion/css";
 import { BehaviorSubject, EMPTY } from 'rxjs'
-import { concatMap, filter, take, withLatestFrom } from 'rxjs/operators'
+import { concatMap, filter, scan, take, withLatestFrom } from 'rxjs/operators'
 import Timeline from "./Timeline";
 import Explosion from "./Explosion";
 import { subscription$, complete$ } from "../domain/pipe";
 
 const view$ = new BehaviorSubject(<View />)
 
+const count$ = new BehaviorSubject(0)
+
+count$
+.pipe(
+  scan((accumulator, current) => accumulator + current),
+)
+.subscribe(count => {
+  const countElement = document.getElementById('rxjs-debugger-subscription-count')
+  if (countElement) {
+    countElement.innerHTML = `${count ? count : 'No active'}`
+  }
+})
+
 function View () {
   return (
     <div id='mydivheader' class={css`
         width: 100%;
         max-width: 800px;
-        background-color: white;
+        background-color: #fffffff2;
         border-radius: 4px;
         transition: box-shadow .25s, -webkit-box-shadow .25s;
         position: fixed;
@@ -24,17 +37,24 @@ function View () {
         max-height: 800px;
         margin: 0px;
         z-index: 2000000;
+        cursor: grab;
       `
     }>
       <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"></link>
       <div class={css`
-        font-size: 1.2em;
-        font-weight: 700;
+        display: flex;
+        justify-content: space-between;
         background-color: #ff00aa;
         padding: 20px;
         margin-bottom: 15px;
       `}>
-        RxJS Debugger
+        <div class={css`
+          font-size: 1.2em;
+          font-weight: 700;
+        `}>
+          RxJS Debugger
+        </div>
+        <div><span id='rxjs-debugger-subscription-count'>No</span> active subscriptions</div>
       </div>
     </div>
   )
@@ -105,6 +125,7 @@ subscription$
     `}>
     <Timeline destruction$={EMPTY} subscriptionId={subscription.id} tag={subscription.tag} />
   </div>
+  count$.next(1)
   view.appendChild(timeline)
   complete$
   .pipe(
@@ -112,6 +133,7 @@ subscription$
     take(1),
   )
   .subscribe(() => {
+    count$.next(-1)
     timeline.appendChild(<div class={css`
       margin: -1.2em;
       position: absolute;
