@@ -20,15 +20,15 @@ import { tag } from "@taterer/rxjs-debugger";
 
 const subscription = observable
 .pipe(
-  tag({ name: 'Example', color: 'gold', icon: 'star' })
+  tag('Example')
 )
 .subscribe();
 ```
 
 ![](https://github.com/taterer/rxjs-debugger/blob/HEAD/src/public/rxjs-debugger-screenshot.png)
 
-## Icons
-RxJS Debugger uses material icons, and provides an enum with some of the options for easy reference. 
+## Customization
+RxJS Debugger uses material icons, and provides an enum with some of the options for easy reference. You can also specify a color to more easily track events in the console.
 ```
 import { tag, Icon } from "@taterer/rxjs-debugger";
 

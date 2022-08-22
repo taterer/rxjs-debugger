@@ -1,4 +1,4 @@
-import { css, cx } from "@emotion/css";
+import { css } from "@emotion/css";
 import { BehaviorSubject, EMPTY } from 'rxjs'
 import { concatMap, filter, take, withLatestFrom } from 'rxjs/operators'
 import Timeline from "./Timeline";

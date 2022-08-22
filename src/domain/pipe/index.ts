@@ -38,11 +38,14 @@ export const emission$: Subject<Emission> = new Subject<Emission>()
  * @param tag.skipTap Skip logging to console
  * @returns RxJS OperatorFunction
  */
-export function tag<T> (tag: Tag): OperatorFunction<T, T> {
+export function tag<T> (tag: Tag | string): OperatorFunction<T, T> {
+  if (typeof tag === 'string') {
+    tag = { name: tag }
+  }
   const subscriptionId = uuid()
   const tagged = pipe(
     (source) => {
-      return source.lift(new TagOperator(tag, subscriptionId))
+      return source.lift(new TagOperator(tag as Tag, subscriptionId))
     },
     tap(i => emission$.next({ subscriptionId, tag, message: i })),
     finalize(() => {

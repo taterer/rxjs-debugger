@@ -1,5 +1,12 @@
 import { OperatorFunction } from 'rxjs'
 
+interface Tag {
+  name: string
+  skipTap?: boolean
+  icon?: string
+  color?: string
+}
+
 declare module '@taterer/rxjs-debugger' {
   /**
    * Keep track of subscriptions and emissions through an RxJS pipeline
@@ -10,15 +17,7 @@ declare module '@taterer/rxjs-debugger' {
    * @returns RxJS OperatorFunction
    */
   export function tag<T>(
-    {
-      name,
-      color,
-      icon,
-    }: {
-      name: string,
-      color?: string,
-      icon?: string,
-    }
+    tag: Tag | string
   ): OperatorFunction<T, T>
 
   export enum Icon {
