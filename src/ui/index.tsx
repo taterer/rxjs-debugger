@@ -1,3 +1,4 @@
+import '@taterer/rx-jsx'
 import { css } from "@emotion/css";
 import { BehaviorSubject, EMPTY } from 'rxjs'
 import { concatMap, filter, scan, take, withLatestFrom } from 'rxjs/operators'
@@ -136,6 +137,7 @@ subscription$
     count$.next(-1)
     timeline.appendChild(<div class={css`
       margin: -1.2em;
+      margin-top: -3em;
       position: absolute;
     `}>
       <Explosion destruction$={EMPTY} icon='flare' color='red' particles={15} />

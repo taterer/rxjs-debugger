@@ -1,5 +1,4 @@
-import { takeUntil } from "rxjs"
-import { toElement$ } from "./jsx"
+import { from, scan, takeUntil } from "rxjs"
 
 const animationTiming = {
   duration: 5000,
@@ -7,32 +6,31 @@ const animationTiming = {
 }
 
 export default function ({ destruction$, color, icon, particles }) {
-  const [explosion$] = toElement$(destruction$)
+  const particleDeg = 360 / particles
+  const explosion$ = from(new Array(particles).fill(0).map(() => <i style={`position: absolute; color: ${color};`} class="material-icons dp48">{icon}</i>))
 
   explosion$
   .pipe(
+    scan((acc, current) => {
+      return [current, acc[1] + 1]
+    }, [undefined, -1]),
     takeUntil(destruction$)
   )
-  .subscribe(explosionElement => {
-    const particleDeg = 360 / particles
-    new Array(particles).fill(0).forEach((i, index) => {
-      const element: Element = <i style={`position: absolute; margin-top: -24px; color: ${color};`} class="material-icons dp48">{icon}</i>
-      explosionElement.appendChild(element)
-      element.animate(
-        [
-          { transform: `rotate(${index * particleDeg}deg) translate(0px)` },
-          { transform: `rotate(${index * particleDeg + 90}deg) translate(0, -50px)` },
-          { transform: `rotate(${index * particleDeg + 180}deg) translate(0, -50px)` },
-          { transform: `rotate(360deg) translate(0px)` },
-          { transform: `rotate(360deg) translate(0px)scale(2)` },
-          { transform: `rotate(360deg) translate(0px)scale(1)` },
-          { transform: `rotate(360deg) translate(0px)scale(2)` },
-          { transform: `rotate(360deg) translate(0px)scale(1)` },
-        ],
-        animationTiming
-      )
-    })
+  .subscribe(([element, index]) => {
+    element.animate(
+      [
+        { transform: `rotate(${index * particleDeg}deg) translate(0px)` },
+        { transform: `rotate(${index * particleDeg + 90}deg) translate(0, -50px)` },
+        { transform: `rotate(${index * particleDeg + 180}deg) translate(0, -50px)` },
+        { transform: `rotate(360deg) translate(0px)` },
+        { transform: `rotate(360deg) translate(0px)scale(2)` },
+        { transform: `rotate(360deg) translate(0px)scale(1)` },
+        { transform: `rotate(360deg) translate(0px)scale(2)` },
+        { transform: `rotate(360deg) translate(0px)scale(1)` },
+      ],
+      animationTiming
+    )
   })
 
-  return <div element$={explosion$} style='position: relative;' />
+  return <div multi$={explosion$} style='position: relative;' />
 }

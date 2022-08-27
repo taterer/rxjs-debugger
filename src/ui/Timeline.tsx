@@ -1,8 +1,7 @@
 import { css } from "@emotion/css"
-import { Observable } from "rxjs"
-import { takeUntil, withLatestFrom, concatMap, filter } from "rxjs/operators"
+import { merge, Observable } from "rxjs"
+import { map, takeUntil, share, concatMap, filter } from "rxjs/operators"
 import { Icon } from "../domain/timeline/command"
-import { toElement$ } from "./jsx"
 import Explosion from "./Explosion"
 import { emission$, Tag } from "../domain/pipe"
 
@@ -20,45 +19,39 @@ export default function Timeline ({
   destruction$,
   subscriptionId,
   tag,
-  debug = false,
-  scroll = true
 }: {
   destruction$: Observable<any>,
   subscriptionId: string,
   tag: Tag,
-  debug?: boolean,
-  scroll?: boolean,
 }) {
-  const [timeline$] = toElement$(destruction$)
-
-  emission$
+  const timelineEvent$ = emission$
   .pipe(
     filter(i => i.subscriptionId === subscriptionId),
     concatMap(async i => i),
-    withLatestFrom(timeline$),
+    map(() => <i style={`position: absolute; color: ${tag.color || 'black'}`} class="material-icons dp48">{tag.icon || Icon.message}</i>),
     takeUntil(destruction$),
   )
-  .subscribe(([emission, timeline]) => {
-    const timelineElement = <i style={`position: ${scroll ? 'absolute' : ''}; color: ${tag.color || 'black'}`} class="material-icons dp48">{tag.icon || Icon.message}</i>
-    timeline.appendChild(timelineElement)
-    if (scroll) {
-      setTimeout(() => {
-        timelineElement.remove()
-      }, animationTiming.duration -1)
-  
-      timelineElement.animate(animationTransform, animationTiming)
-    }
 
-    if (emission.tag.icon === 'star') {
-      timelineElement.appendChild(<Explosion destruction$={destruction$} icon='star' color='gold' particles={10} />)
-    }
+  const explosion$ = emission$
+  .pipe(
+    filter(i => i.subscriptionId === subscriptionId && i.tag.icon === 'star'),
+    concatMap(async i => i),
+    map(() => <Explosion destruction$={destruction$} icon='star' color='gold' particles={10} />),
+    takeUntil(destruction$),
+  )
 
-    if (debug) {
-      console.log('Timeline element', timelineElement)
-    }
+  const timelineEvents$ = merge(explosion$, timelineEvent$).pipe(share())
+
+  timelineEvents$
+  .subscribe(element => {
+    setTimeout(() => {
+      element.remove()
+    }, animationTiming.duration -1)
+
+    element.animate(animationTransform, animationTiming)
   })
 
-  return <div element$={timeline$}
+  return <div multi$={timelineEvents$}
     class={css`
       display: flex;
       flex-direction: row-reverse;
