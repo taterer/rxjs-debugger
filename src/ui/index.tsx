@@ -1,29 +1,70 @@
 import '@taterer/rx-jsx'
 import { css } from "@emotion/css";
-import { BehaviorSubject, EMPTY } from 'rxjs'
-import { concatMap, filter, scan, take, withLatestFrom } from 'rxjs/operators'
+import { BehaviorSubject, EMPTY, of, Subject } from 'rxjs'
+import { concatMap, delay, filter, map, scan, take, takeUntil } from 'rxjs/operators'
 import Timeline from "./Timeline";
 import Explosion from "./Explosion";
 import { subscription$, complete$ } from "../domain/pipe";
-
-const view$ = new BehaviorSubject(<View />)
-
-const count$ = new BehaviorSubject(0)
-
-count$
-.pipe(
-  scan((accumulator, current) => accumulator + current),
-)
-.subscribe(count => {
-  const countElement = document.getElementById('rxjs-debugger-subscription-count')
-  if (countElement) {
-    countElement.innerHTML = `${count ? count : 'No active'}`
-  }
-})
+import { withAnimationFrame } from '@taterer/rx-jsx';
 
 function View () {
-  return (
-    <div id='mydivheader' class={css`
+  const count$ = new BehaviorSubject(0)
+
+  const activeSubscriptions$ = count$
+  .pipe(
+    withAnimationFrame,
+    scan((accumulator, current) => accumulator + current),
+    map(count => <div>{count ? count : 'No'} active subscriptions</div>),
+  )
+  
+  const subscriptions$ = subscription$
+  .pipe(
+    concatMap(async i => i),
+    map(subscription => {
+      count$.next(1)
+      const destroy$ = new Subject()
+      const explosion$ = complete$
+      .pipe(
+        filter(i => i.id === subscription.id),
+        takeUntil(destroy$),
+        map(() => {
+          count$.next(-1)
+          return (
+            <div class={css`
+              margin: -1.2em;
+              margin-top: -3em;
+              position: absolute;
+            `}>
+              <Explosion destruction$={EMPTY} icon='flare' color='red' particles={15} />
+            </div>
+          )
+        })
+      )
+  
+      explosion$
+      .pipe(
+        take(1),
+        delay(5000)
+      )
+      .subscribe(() => destroy$.next(undefined))
+      
+      return <div
+        class={css`
+          padding: 10px 20px;
+        `}
+        single$={explosion$}
+      >
+        <Timeline
+          destruction$={EMPTY}
+          subscriptionId={subscription.id}
+          tag={subscription.tag}
+          />
+      </div>
+    })
+  )
+  
+  const view$ = of(
+    <div id='rxjs-debugger' class={css`
         width: 100%;
         max-width: 800px;
         background-color: #fffffff2;
@@ -38,6 +79,7 @@ function View () {
         max-height: 800px;
         margin: 0px;
         z-index: 2000000;
+        touch-action: none;
         cursor: grab;
       `
     }>
@@ -55,95 +97,68 @@ function View () {
         `}>
           RxJS Debugger
         </div>
-        <div><span id='rxjs-debugger-subscription-count'>No</span> active subscriptions</div>
+        <div single$={activeSubscriptions$} />
       </div>
+      <div multi$={subscriptions$} />
     </div>
+  )
+
+  view$
+  .pipe(
+    take(1)
+  )
+  .subscribe(view => dragElement(view))
+
+  return (
+    <div single$={view$} />
   )
 }
 
-view$
-.pipe(
-  take(1)
-)
-.subscribe(view => {
-  const parent = <div id='mydiv' />
-  parent.appendChild(view)
-  document.body.appendChild(parent)
-  dragElement(view)
-})
+document.body.appendChild(<View />)
 
-function dragElement(elmnt) {
+function dragElement(element) {
   var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  const headerElement = document.getElementById(elmnt.id + "header")
-  if (headerElement) {
-    // if present, the header is where you move the DIV from:
-    headerElement.onmousedown = dragMouseDown;
-  } else {
-    // otherwise, move the DIV from anywhere inside the DIV:
-    elmnt.onmousedown = dragMouseDown;
-  }
+  element.onmousedown = dragMouseDown;
+  element.ontouchstart = event => dragMouseDown(event.touches[0], false);
 
-  function dragMouseDown(e) {
-    e = e || window.event;
-    e.preventDefault();
+  function dragMouseDown(event, preventDefault = true) {
+    event = event || window.event;
+    if (preventDefault) {
+      event.preventDefault();
+    }
     // get the mouse cursor position at startup:
-    pos3 = e.clientX;
-    pos4 = e.clientY;
+    pos3 = event.clientX;
+    pos4 = event.clientY;
     document.onmouseup = closeDragElement;
+    document.ontouchend = closeDragElement;
     // call a function whenever the cursor moves:
     document.onmousemove = elementDrag;
+    document.ontouchmove = e => {
+      e.preventDefault()
+      elementDrag(e.touches[0], false)
+    };
   }
 
-  function elementDrag(e) {
-    e = e || window.event;
-    e.preventDefault();
+  function elementDrag(event, preventDefault = true) {
+    event = event || window.event;
+    if (preventDefault) {
+      event.preventDefault();
+    }
     // calculate the new cursor position:
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
+    pos1 = pos3 - event.clientX;
+    pos2 = pos4 - event.clientY;
+    pos3 = event.clientX;
+    pos4 = event.clientY;
     // set the element's new position:
-    elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-    elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    element.style.top = (element.offsetTop - pos2) + "px";
+    element.style.left = (element.offsetLeft - pos1) + "px";
   }
 
   function closeDragElement() {
     // stop moving when mouse button is released:
     document.onmouseup = null;
     document.onmousemove = null;
+    document.ontouchend = null;
+    document.ontouchmove = null;
   }
 }
-
-subscription$
-.pipe(
-  concatMap(async i => i),
-  withLatestFrom(view$),
-)
-.subscribe(([subscription, view]) => {
-  const timeline = <div
-    class={css`
-      padding: 10px 20px;
-    `}>
-    <Timeline destruction$={EMPTY} subscriptionId={subscription.id} tag={subscription.tag} />
-  </div>
-  count$.next(1)
-  view.appendChild(timeline)
-  complete$
-  .pipe(
-    filter(i => i.id === subscription.id),
-    take(1),
-  )
-  .subscribe(() => {
-    count$.next(-1)
-    timeline.appendChild(<div class={css`
-      margin: -1.2em;
-      margin-top: -3em;
-      position: absolute;
-    `}>
-      <Explosion destruction$={EMPTY} icon='flare' color='red' particles={15} />
-    </div>)
-    setTimeout(() => {
-      timeline.remove()
-    }, 5000)
-  })
-})
