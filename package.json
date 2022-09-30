@@ -1,6 +1,6 @@
 {
   "name": "@taterer/rxjs-debugger",
-  "version": "1.1.3",
+  "version": "1.1.4",
   "description": "Visualize RxJS pipes with scrolling UI elements",
   "author": "Taylor McKay",
   "license": "MIT",
@@ -8,21 +8,20 @@
     "url": "https://github.com/taterer/rxjs-debugger/issues"
   },
   "dependencies": {
-    "@emotion/css": "^11.9.0",
+    "@emotion/css": "^11.10.0",
     "@taterer/rx-jsx": "^1.0.4",
-    "uuid": "^8.3.2"
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.0",
-    "@babel/plugin-transform-react-jsx": "^7.17.3",
-    "@babylonjs/core": "^5.4.0",
-    "@babylonjs/loaders": "^5.4.0",
-    "@parcel/reporter-bundle-analyzer": "^2.4.1",
+    "@babel/core": "^7.19.3",
+    "@babel/plugin-transform-react-jsx": "^7.19.0",
+    "@parcel/reporter-bundle-analyzer": "^2.7.0",
     "buffer": "^6.0.3",
-    "parcel": "^2.4.1",
-    "parcel-reporter-static-files-copy": "^1.3.4",
-    "ts-node": "^10.7.0",
-    "typescript": "^4.6.3"
+    "parcel": "^2.7.0",
+    "parcel-reporter-static-files-copy": "^1.4.0",
+    "rxjs": "^7.5.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.4"
   },
   "peerDependencies": {
     "rxjs": "^7"
@@ -41,7 +40,8 @@
     "url": "git+https://github.com/taterer/rxjs-debugger.git"
   },
   "scripts": {
-    "build": "parcel build"
+    "build": "parcel build",
+    "watch": "parcel watch"
   },
   "source": "src/index.ts",
   "main": "dist/main.js"

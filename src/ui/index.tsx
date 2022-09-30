@@ -1,6 +1,5 @@
-import '@taterer/rx-jsx'
 import { css } from "@emotion/css";
-import { BehaviorSubject, EMPTY, of, Subject } from 'rxjs'
+import { BehaviorSubject, EMPTY, Observable, of, Subject } from 'rxjs'
 import { concatMap, delay, filter, map, scan, take, takeUntil } from 'rxjs/operators'
 import Timeline from "./Timeline";
 import Explosion from "./Explosion";
@@ -8,16 +7,16 @@ import { subscription$, complete$ } from "../domain/pipe";
 import { withAnimationFrame } from '@taterer/rx-jsx';
 
 function View () {
-  const count$ = new BehaviorSubject(0)
+  const count$ = new BehaviorSubject<number>(0)
 
   const activeSubscriptions$ = count$
   .pipe(
     withAnimationFrame,
-    scan((accumulator, current) => accumulator + current),
+    scan<number, number>((accumulator, current) => accumulator + current),
     map(count => <div>{count ? count : 'No'} active subscriptions</div>),
   )
 
-  const subscriptions$ = subscription$
+  const subscriptions$: Observable<HTMLElement> = subscription$
   .pipe(
     concatMap(async i => i),
     map(subscription => {

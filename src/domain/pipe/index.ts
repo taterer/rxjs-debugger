@@ -7,7 +7,6 @@ import {
   finalize,
   Operator,
   OperatorFunction,
-  Subscription,
   Subscriber,
   Subject
 } from 'rxjs'
