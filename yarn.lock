@@ -1096,10 +1096,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@taterer/rx-jsx@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@taterer/rx-jsx/-/rx-jsx-1.0.3.tgz#a8e3fbe23a4659f968abc636cc05d617e41ba552"
-  integrity sha512-dKJKEtyPsx75sv383XuYLFKqNL+vyhUssK5cgR6HfY30f+v5aOueL1evdzP7hjLh/Qe3bP9zTiqCLPaaGFnndA==
+"@taterer/rx-jsx@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@taterer/rx-jsx/-/rx-jsx-1.0.4.tgz#02a3e4f6970fa84a0d4a47fff14680b8d471b523"
+  integrity sha512-D5+d5YDR9ijcLIqRVo13Tcgq53lAz1CsxBH5Bmxma5e7jfifYhHElwgOltmES1XqFutKrHZp4XO4glREAYW8tw==
 
 "@trysound/sax@0.2.0":
   version "0.2.0"

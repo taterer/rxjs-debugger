@@ -16,7 +16,7 @@ function View () {
     scan((accumulator, current) => accumulator + current),
     map(count => <div>{count ? count : 'No'} active subscriptions</div>),
   )
-  
+
   const subscriptions$ = subscription$
   .pipe(
     concatMap(async i => i),
@@ -28,7 +28,6 @@ function View () {
         filter(i => i.id === subscription.id),
         takeUntil(destroy$),
         map(() => {
-          count$.next(-1)
           return (
             <div class={css`
               margin: -1.2em;
@@ -46,7 +45,10 @@ function View () {
         take(1),
         delay(5000)
       )
-      .subscribe(() => destroy$.next(undefined))
+      .subscribe(() => {
+        count$.next(-1)
+        destroy$.next(undefined)
+      })
       
       return <div
         class={css`
@@ -62,7 +64,7 @@ function View () {
       </div>
     })
   )
-  
+
   const view$ = of(
     <div id='rxjs-debugger' class={css`
         width: 100%;
