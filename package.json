@@ -9,6 +9,9 @@
   },
   "dependencies": {
     "@emotion/css": "^11.10.0",
+    "@taterer/persist": "^1.0.3",
+    "@taterer/persist-memory": "^1.0.5",
+    "@taterer/rx-entity": "^1.0.1",
     "@taterer/rx-jsx": "^1.0.4",
     "uuid": "^9.0.0"
   },

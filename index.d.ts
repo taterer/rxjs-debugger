@@ -28,6 +28,11 @@ declare module '@taterer/rxjs-debugger' {
     ms?: number
   ): OperatorFunction<T, T>
 
+  /**
+   * Track every subscription
+   */
+   export function fullAnalysis(): void
+
   export enum Icon {
     airline_seat_recline_extra = 'airline_seat_recline_extra',
     add_circle = 'add_circle',
