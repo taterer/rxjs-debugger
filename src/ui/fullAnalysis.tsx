@@ -4,7 +4,14 @@ import { dragElement } from './draggable'
 const subscriptionsMap: Map<string, { tracePath: string, count: number, stacktrace: string }> = new Map();
 let subscriptionsDeltaMap: Map<string, { tracePath: string, count: number }> = new Map();
 
+let renderTimer
+
 function render (element) {
+  clearTimeout(renderTimer)
+  renderTimer = setTimeout(() => actualRender(element), 5)
+}
+
+function actualRender (element) {
   element.replaceChildren(<div>
     <div
       style={`
@@ -23,24 +30,38 @@ function render (element) {
       }}>Delta</div>
       <div style='flex-grow: 1; width: 0px;'>Trace</div>
     </div>
-    {Array.from(subscriptionsMap.values()).map((subscription) => {
-      return (
-        <div
-          onclick={() => { console.log(`${subscription.tracePath.split('---').slice(0, subscription.tracePath.split('---').length - 1 || 1).join('---')} 
-          ${subscription.stacktrace}`) }}
-          style={`
-            cursor: pointer;
-            margin: 10px;
-            display: flex;
-            align-items: center;
-          `}
-        >
-          <div style='padding: 10px; width: 60px; text-align: center;'>{subscription.count}</div>
-          <div style='padding: 10px; width: 60px; text-align: center;'>{subscription.count - (subscriptionsDeltaMap.get(subscription.tracePath)?.count || 0)}</div>
-          <div style='flex-grow: 1; width: 0px;'>{subscription.tracePath}</div>
-        </div>
-      )
-    })}
+    {Array.from(subscriptionsMap.values())
+      .sort((a, b) => {
+        if (a.count === b.count) {
+          if (b.stacktrace > a.stacktrace) {
+            return -1
+          } else {
+            return 1
+          }
+        } else {
+          return b.count - a.count
+        }
+      })
+      .map((subscription) => {
+        const delta = subscription.count - (subscriptionsDeltaMap.get(subscription.tracePath)?.count || 0)
+        return (
+          <div
+            onclick={() => { console.log(`TRACE ${subscription.tracePath.split(' -> ').slice(0, subscription.tracePath.split(' -> ').length - 1 || 1).join(' -> ')} 
+            ${subscription.stacktrace}`) }}
+            style={`
+              cursor: pointer;
+              margin: 10px;
+              display: flex;
+              align-items: center;
+            `}
+          >
+            <div style='padding: 10px; width: 60px; text-align: center;'>{subscription.count}</div>
+            <div style={`padding: 10px; width: 60px; text-align: center; background-color: ${delta > 0 ? '#ff8080' : delta < 0 ? '#ffff80' : '#90ee90'};`}>{delta}</div>
+            <div style='flex-grow: 1; width: 0px;'>{subscription.tracePath}</div>
+          </div>
+        )
+      })
+    }
   </div>)
 }
 
@@ -60,9 +81,8 @@ const getTracePath = (stacktrace) => {
   .filter(i => i !== 'Observable._subscribe')
   .filter(i => i !== 'Observable.subscribe')
   .filter(i => i !== 'Observable._trySubscribe')
-  .filter(i => i !== 'errorContext')
   .filter(i => i !== 'newRequire')
-  .join('---')
+  .join(' -> ')
 };
 
 export function fullAnalysis () {
@@ -103,52 +123,38 @@ export function fullAnalysis () {
   </div>
 
   document.body.appendChild(container)
-  dragElement(container)
+  dragElement(container);
 
-  // Thank you Filipe Mendes for the proper method to enhance the Observable prototype
-  // https://github.com/filipemendes1994/rxjs-debugger
+  (function (originalSubscribe) {
+    Observable.prototype.subscribe = function overrideSubscribe () {
+      const subscription = originalSubscribe.call(this, ...arguments)
 
-  const originalSubscribeFn = Observable.prototype.subscribe
+      const stacktrace = new Error('TRACING').stack!;
+      if ((stacktrace.match(/.overrideSubscribe/g) || []).length === 1) { // Thank you Filipe Mendes for the help ignoring nested subscriptions https://github.com/filipemendes1994/rxjs-debugger
+        const tracePath = getTracePath(stacktrace);
 
-  Observable.prototype.subscribe = function overrideSubscribe(...args) {
-    const stacktrace = new Error('TRACING').stack!;
-    const handleSubscription = isFirstCall(stacktrace);
-
-    if (!handleSubscription) {
-      return originalSubscribeFn.call(this, ...args);
-    }
-    const tracePath = getTracePath(stacktrace);
-    if (!tracePath) {
-      return originalSubscribeFn.call(this, ...args);
-    }
-    const existingRecord = subscriptionsMap.get(tracePath) || { count: 0 }
-    subscriptionsMap.set(tracePath, {
-      tracePath,
-      count: existingRecord.count + 1,
-      stacktrace
-    })
-    
-    render(element)
-
-    return originalSubscribeFn.call(this, ...args).add(() => {
-      const unsubRecord = subscriptionsMap.get(tracePath) || { tracePath: getTracePath(stacktrace), count: 1, stacktrace }
-      const newCount = unsubRecord.count - 1
-      if (newCount) {
-        subscriptionsMap.set(tracePath, { tracePath: unsubRecord.tracePath, count: newCount, stacktrace: unsubRecord.stacktrace })
-      } else {
-        subscriptionsMap.delete(tracePath)
+        const existingRecord = subscriptionsMap.get(tracePath) || { count: 0 }
+        subscriptionsMap.set(tracePath, {
+          tracePath,
+          count: existingRecord.count + 1,
+          stacktrace
+        })
+        
+        render(element)
+  
+        // register a callback for when the subscription is completed
+        subscription.add(() => {
+          const unsubRecord = subscriptionsMap.get(tracePath) || { tracePath: getTracePath(stacktrace), count: 1, stacktrace }
+          const newCount = unsubRecord.count - 1
+          if (newCount) {
+            subscriptionsMap.set(tracePath, { tracePath: unsubRecord.tracePath, count: newCount, stacktrace: unsubRecord.stacktrace })
+          } else {
+            subscriptionsMap.delete(tracePath)
+          }
+          render(element)
+        })
       }
-      render(element)
-    });
-  };
+      return subscription
+    }
+  })(Observable.prototype.subscribe)
 }
-
-// Thank you Filipe
-/**
-* Test if we are handling the first call of subscribe method
-* NOTE: when an observable is subscribed, this method is called recursivelly
-* per each applied pipe operator.
-*
-* @param {*} stacktrace
-*/
-const isFirstCall = (stacktrace) => (stacktrace.match(/.overrideSubscribe/g) || []).length === 1;
