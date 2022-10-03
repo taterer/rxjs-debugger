@@ -12,7 +12,7 @@
     "@taterer/persist": "^1.0.3",
     "@taterer/persist-memory": "^1.0.5",
     "@taterer/rx-entity": "^1.0.1",
-    "@taterer/rx-jsx": "^1.0.4",
+    "@taterer/rx-jsx": "^1.0.5",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
