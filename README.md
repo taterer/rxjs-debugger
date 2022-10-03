@@ -16,7 +16,7 @@ or
 
 `npm i --save-dev @taterer/rxjs-debugger`
 # Use
-Call fullAnalysis at the beginning of your code to track all subscriptions in your application.
+Call fullAnalysis at the beginning of your code to track all subscriptions in your application. Click on the "Delta" column header to zero-out the delta, and track changes from there. EG: zero-out, navigate to a new page, come back and verify the delta is 0. Click on subscriptions in the UI to get a stack trace in the console to track down exactly where the subscriptions are coming from.
 ```
 import { fullAnalysis } from "@taterer/rxjs-debugger";
 fullAnalysis()
